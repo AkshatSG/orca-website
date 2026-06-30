@@ -888,6 +888,38 @@
 
         .pricing-period { font-size: 12.5px; color: var(--text3); margin-bottom: 28px; }
 
+        .pricing-toggle-wrap {
+            display: flex; align-items: center; justify-content: center;
+            gap: 12px; margin-bottom: 44px;
+        }
+        .pricing-toggle-label {
+            font-size: 13.5px; color: var(--text2); font-weight: 500; cursor: pointer;
+            transition: color .15s;
+        }
+        .pricing-toggle-label.active { color: var(--text); }
+        .pricing-toggle {
+            position: relative; width: 42px; height: 24px; cursor: pointer;
+        }
+        .pricing-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+        .pricing-toggle-track {
+            position: absolute; inset: 0; border-radius: 100px;
+            background: var(--s3); border: 1px solid var(--border2);
+            transition: background .2s;
+        }
+        .pricing-toggle input:checked ~ .pricing-toggle-track { background: var(--green); border-color: var(--green); }
+        .pricing-toggle-thumb {
+            position: absolute; top: 3px; left: 3px;
+            width: 16px; height: 16px; border-radius: 50%;
+            background: #fff; transition: transform .2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+        }
+        .pricing-toggle input:checked ~ .pricing-toggle-thumb { transform: translateX(18px); }
+        .pricing-save-badge {
+            font-size: 10.5px; font-weight: 600; padding: 2px 8px; border-radius: 100px;
+            background: rgba(34,197,94,0.12); color: var(--green);
+            border: 1px solid rgba(34,197,94,0.25);
+        }
+
         .pricing-divider { height: 1px; background: var(--border); margin-bottom: 24px; }
 
         .pricing-features { list-style: none; display: flex; flex-direction: column; gap: 11px; margin-bottom: 32px; flex: 1; }
@@ -1541,10 +1573,20 @@
             <div class="section-heading">Simple plans.<br>Serious workflows.</div>
             <p class="section-sub" style="margin:0 auto 56px;">Free during beta. These prices apply once paid plans launch.</p>
         </div>
+        <!-- Billing toggle -->
+        <div class="pricing-toggle-wrap reveal">
+            <span class="pricing-toggle-label active" id="toggle-monthly-lbl">Monthly</span>
+            <label class="pricing-toggle">
+                <input type="checkbox" id="pricing-billing-toggle">
+                <span class="pricing-toggle-track"></span>
+                <span class="pricing-toggle-thumb"></span>
+            </label>
+            <span class="pricing-toggle-label" id="toggle-yearly-lbl">Yearly <span class="pricing-save-badge">Save 17%</span></span>
+        </div>
+
         <div class="pricing-grid reveal d1">
             <!-- Free -->
             <div class="pricing-card">
-                <span class="pricing-badge free-badge">Free during beta</span>
                 <div class="pricing-name">Free</div>
                 <div class="pricing-price">$0</div>
                 <div class="pricing-period">forever free tier</div>
@@ -1562,8 +1604,8 @@
             <div class="pricing-card pro">
                 <span class="pricing-badge popular-badge">Most popular</span>
                 <div class="pricing-name">Pro</div>
-                <div class="pricing-price">$12 <span>/ mo</span></div>
-                <div class="pricing-period">billed monthly</div>
+                <div class="pricing-price" id="pro-price">$12 <span>/ mo</span></div>
+                <div class="pricing-period" id="pro-period">billed monthly</div>
                 <div class="pricing-divider"></div>
                 <ul class="pricing-features">
                     <li>500 tasks / month</li>
@@ -1578,8 +1620,8 @@
             <div class="pricing-card">
                 <span class="pricing-badge max-badge">Power users</span>
                 <div class="pricing-name">Max</div>
-                <div class="pricing-price">$24 <span>/ mo</span></div>
-                <div class="pricing-period">billed monthly</div>
+                <div class="pricing-price" id="max-price">$24 <span>/ mo</span></div>
+                <div class="pricing-period" id="max-period">billed monthly</div>
                 <div class="pricing-divider"></div>
                 <ul class="pricing-features">
                     <li>Unlimited tasks</li>
@@ -2215,6 +2257,35 @@ function closeModal() {
 document.querySelectorAll('.pricing-waitlist-btn').forEach(btn => {
     btn.addEventListener('click', openModal);
 });
+
+// Pricing billing toggle
+(function() {
+    const toggle = document.getElementById('pricing-billing-toggle');
+    const monthlyLbl = document.getElementById('toggle-monthly-lbl');
+    const yearlyLbl  = document.getElementById('toggle-yearly-lbl');
+    const proPrice   = document.getElementById('pro-price');
+    const proPeriod  = document.getElementById('pro-period');
+    const maxPrice   = document.getElementById('max-price');
+    const maxPeriod  = document.getElementById('max-period');
+
+    toggle.addEventListener('change', function() {
+        const yearly = this.checked;
+        monthlyLbl.classList.toggle('active', !yearly);
+        yearlyLbl.classList.toggle('active', yearly);
+
+        if (yearly) {
+            proPrice.innerHTML = '$120 <span>/ yr</span>';
+            proPeriod.textContent = '';
+            maxPrice.innerHTML = '$240 <span>/ yr</span>';
+            maxPeriod.textContent = '';
+        } else {
+            proPrice.innerHTML = '$12 <span>/ mo</span>';
+            proPeriod.textContent = 'billed monthly';
+            maxPrice.innerHTML = '$24 <span>/ mo</span>';
+            maxPeriod.textContent = 'billed monthly';
+        }
+    });
+})();
 modalClose.addEventListener('click', closeModal);
 modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
